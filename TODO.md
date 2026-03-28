@@ -1,18 +1,11 @@
-# Tenant Disputes Page Implementation - Issue #660
+# Issue #661 - Tenant Reviews Page
 
-## Status: ✅ In Progress
-
-## Steps (completed items will be struck through)
-
-### 1. [✅] Create TODO.md with implementation plan
-### 2. [✅] Create `frontend/lib/query/hooks/use-tenant-disputes.ts` - React Query hook for disputes list
-### 3. [✅] Create `frontend/lib/query/hooks/use-tenant-dispute.ts` - Hook for single dispute details & comments  
-### 4. [✅] Create `frontend/components/tenant/DisputesList.tsx` - Reusable list/table component
-### 5. [✅] Create `frontend/components/tenant/DisputeDetail.tsx` - Detail view with timeline/comments
-### 6. [✅] Create `frontend/app/tenant/disputes/page.tsx` - Main list page
-### 7. [✅] Create `frontend/app/tenant/disputes/[id]/page.tsx` - Detail page
-### 8. [✅] Install dependencies & test (npm run dev running)
-### 9. [✅] Verified: responsive, auth, loading/errors, filters/sort/paginate, TS clean
-
-**Next step: 2**
-
+## Steps
+- [ ] Step 1: Create frontend/app/tenant/reviews/page.tsx (list page w/ auth)
+- [ ] Step 2: Create frontend/app/tenant/reviews/[id]/page.tsx (detail/edit)
+- [ ] Step 3: Create frontend/components/tenant/ReviewsList.tsx (React Table)
+- [ ] Step 4: Create frontend/components/tenant/ReviewForm.tsx (create/edit)
+- [ ] Step 5: Create frontend/components/common/StarRating.tsx
+- [ ] Step 6: Create hooks: frontend/lib/query/hooks/use-tenant-reviews.ts + mutations
+- [ ] Step 7: Test functionality
+- [ ] Complete
