@@ -13,9 +13,12 @@ Welcome to the Chioma backend documentation hub. This index covers all aspects o
 | [Architecture](#architecture)       | System design, dependency graph, performance     |
 | [Database](#database)               | Schema, migrations, indexes                      |
 | [Blockchain](#blockchain)           | Stellar integration, anchor, SEP-0010 auth       |
+| [Authentication](#authentication)   | JWT, Stellar auth, MFA, guards, security         |
 | [Caching](#caching)                 | Redis/Upstash strategy, invalidation, monitoring |
 | [Queues](#queues)                   | Bull queue implementation                        |
 | [Deployment](#deployment)           | Production setup, Docker, CI/CD                  |
+| [Error Handling](#error-handling)    | Exception filters, error types, error responses  |
+| [Logging & Monitoring](#logging--monitoring) | Logging, Prometheus, Grafana, Sentry, alerts |
 | [Security](#security)               | Encryption, threat model, compliance             |
 | [Integrations](#integrations)       | Third-party services                             |
 | [Support](#support)                 | Support procedures, SLAs, maintenance schedules  |
@@ -124,6 +127,18 @@ pnpm run migration:generate  # generate migration from entity changes
 
 ---
 
+## Authentication
+
+| Document                                                     | Summary                                                                  |
+| ------------------------------------------------------------ | ------------------------------------------------------------------------ |
+| [Authentication Documentation](./AUTHENTICATION.md)          | Full architecture, JWT/Stellar flows, MFA, guards, decorators, security  |
+| [API Authentication Guide](./api/AUTHENTICATION.md)          | Quick API reference with request/response examples                       |
+| [Stellar Auth (SEP-0010)](./blockchain/stellar-auth.md)      | Wallet-based authentication flow details                                 |
+
+Chioma supports dual authentication: **JWT (email/password)** and **Stellar SEP-0010 (wallet)**. Both methods issue JWT access tokens with 15-minute lifetime and HttpOnly cookie refresh tokens with 7-day lifetime. MFA via TOTP is available for all accounts.
+
+---
+
 ## Caching
 
 | Document                                        | Summary                                 |
@@ -160,6 +175,26 @@ Docker Compose files:
 - `docker-compose.production.yml` — production
 - `docker-compose.monitoring.yml` — Prometheus + Grafana
 - `docker-compose.docs.yml` — serve docs locally
+
+---
+
+## Error Handling
+
+| Document                                    | Summary                                                      |
+| ------------------------------------------- | ------------------------------------------------------------ |
+| [Error Handling](./ERROR_HANDLING.md)       | Exception filters, custom errors, frontend classification, error response formats |
+
+The `AllExceptionsFilter` catches all unhandled exceptions and maps them to standardized JSON responses. The frontend uses an `AppError` type system with error classification, user-friendly messages, and retry logic.
+
+---
+
+## Logging & Monitoring
+
+| Document                                                  | Summary                                                          |
+| --------------------------------------------------------- | ---------------------------------------------------------------- |
+| [Logging & Monitoring](./LOGGING_AND_MONITORING.md)       | LoggerService, middleware, Sentry, Prometheus, Grafana, Loki, alerts |
+
+The platform uses structured JSON logging with correlation IDs, sensitive data sanitization, and a full Prometheus + Grafana + Loki + Alertmanager monitoring stack.
 
 ---
 
