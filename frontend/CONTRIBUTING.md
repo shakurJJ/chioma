@@ -119,9 +119,7 @@ When creating components, follow these patterns:
 frontend/
 ├── app/                          # Next.js App Router pages
 │   ├── admin/                    # Admin dashboard routes
-│   ├── dashboard/                # User dashboard routes
-│   ├── landlords/                # Landlord-specific routes
-│   ├── tenant/                   # Tenant-specific routes
+│   ├── user/                     # User dashboard routes
 │   ├── properties/               # Property listing routes
 │   ├── layout.tsx                # Root layout
 │   ├── page.tsx                  # Home page
@@ -165,7 +163,7 @@ frontend/
 
 **`app/`** - Next.js App Router pages
 
-- Organized by feature/role (admin, landlords, tenant, etc.)
+- Organized by feature/role (admin, user, etc.)
 - Each route can have `layout.tsx`, `page.tsx`, `error.tsx`, `loading.tsx`
 - Use `'use client'` directive for client components
 
