@@ -8,9 +8,9 @@ import {
 } from '../modules/users/entities/user.entity';
 
 const SALT_ROUNDS = 12;
-const logger = new Logger('AdminSeed');
+const logger = new Logger('UserSeed');
 
-interface SeedAdminOptions {
+interface SeedUserOptions {
   email?: string;
   password?: string;
   firstName?: string;
@@ -18,7 +18,7 @@ interface SeedAdminOptions {
   force: boolean;
 }
 
-interface SeedAdminConfig {
+interface SeedUserConfig {
   email: string;
   password?: string;
   firstName: string;
@@ -27,8 +27,8 @@ interface SeedAdminConfig {
   autoGeneratePassword: boolean;
 }
 
-function parseCliArgs(argv: string[]): SeedAdminOptions {
-  const options: SeedAdminOptions = {
+function parseCliArgs(argv: string[]): SeedUserOptions {
+  const options: SeedUserOptions = {
     force: false,
   };
 
@@ -112,7 +112,7 @@ function validateEmail(email: string): void {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   if (!emailRegex.test(normalizedEmail)) {
-    throw new Error('Invalid Admin email format');
+    throw new Error('Invalid user email format');
   }
 }
 
@@ -138,32 +138,32 @@ function validatePassword(password: string): void {
   }
 }
 
-function getSeedConfig(options: SeedAdminOptions): SeedAdminConfig {
+function getSeedConfig(options: SeedUserOptions): SeedUserConfig {
   const autoGeneratePassword = parseBoolean(
-    process.env.ADMIN_AUTO_GENERATE_PASSWORD,
+    process.env.USER_AUTO_GENERATE_PASSWORD,
     true,
   );
 
   return {
     email: (
       options.email ??
-      process.env.ADMIN_DEFAULT_EMAIL ??
-      'admin@chioma.local'
+      process.env.USER_DEFAULT_EMAIL ??
+      'user@chioma.local'
     )
       .trim()
       .toLowerCase(),
     password: options.password,
     firstName:
-      options.firstName ?? process.env.ADMIN_DEFAULT_FIRST_NAME ?? 'Demo',
+      options.firstName ?? process.env.USER_DEFAULT_FIRST_NAME ?? 'Demo',
     lastName:
-      options.lastName ?? process.env.ADMIN_DEFAULT_LAST_NAME ?? 'Admin',
+      options.lastName ?? process.env.USER_DEFAULT_LAST_NAME ?? 'User',
     force: options.force,
     autoGeneratePassword,
   };
 }
 
-export async function seedAdminUser(
-  options: SeedAdminOptions = { force: false },
+export async function seedUser(
+  options: SeedUserOptions = { force: false },
 ) {
   const config = getSeedConfig(options);
   validateEmail(config.email);
@@ -175,7 +175,7 @@ export async function seedAdminUser(
 
   if (!plainPassword) {
     throw new Error(
-      'Admin password is required. Provide --password or set ADMIN_AUTO_GENERATE_PASSWORD=true',
+      'User password is required. Provide --password or set USER_AUTO_GENERATE_PASSWORD=true',
     );
   }
 
@@ -195,7 +195,7 @@ export async function seedAdminUser(
     if (existingUser) {
       if (!config.force) {
         logger.log(
-          `Admin seed skipped: user already exists for ${config.email}`,
+          `User seed skipped: user already exists for ${config.email}`,
         );
         logger.log('Use --force to update the existing user.');
         return;
@@ -204,7 +204,7 @@ export async function seedAdminUser(
       existingUser.firstName = config.firstName;
       existingUser.lastName = config.lastName;
       existingUser.password = passwordHash;
-      existingUser.role = UserRole.ADMIN;
+      existingUser.role = UserRole.USER;
       existingUser.emailVerified = true;
       existingUser.verificationToken = null;
       existingUser.resetToken = null;
@@ -216,14 +216,14 @@ export async function seedAdminUser(
 
       await userRepository.save(existingUser);
 
-      logger.log(`Admin user updated: ${existingUser.email}`);
+      logger.log(`User updated: ${existingUser.email}`);
     } else {
-      const adminUser = userRepository.create({
+      const userObj = userRepository.create({
         email: config.email,
         password: passwordHash,
         firstName: config.firstName,
         lastName: config.lastName,
-        role: UserRole.ADMIN,
+        role: UserRole.USER,
         emailVerified: true,
         verificationToken: null,
         resetToken: null,
@@ -235,13 +235,13 @@ export async function seedAdminUser(
         refreshToken: null,
       });
 
-      const savedAdmin = await userRepository.save(adminUser);
-      logger.log(`Admin user created: ${savedAdmin.email}`);
+      const savedUser = await userRepository.save(userObj);
+      logger.log(`User created: ${savedUser.email}`);
     }
 
     const passwordSource = config.password ? 'provided' : 'generated';
-    logger.log(`Admin password (${passwordSource}): ${plainPassword}`);
-    logger.log('Admin seeding completed successfully.');
+    logger.log(`User password (${passwordSource}): ${plainPassword}`);
+    logger.log('User seeding completed successfully.');
   } finally {
     if (AppDataSource.isInitialized) {
       await AppDataSource.destroy();
@@ -252,13 +252,13 @@ export async function seedAdminUser(
 if (require.main === module) {
   const options = parseCliArgs(process.argv.slice(2));
 
-  void seedAdminUser(options)
+  void seedUser(options)
     .then(() => {
       process.exit(0);
     })
     .catch((error: unknown) => {
       const message = error instanceof Error ? error.message : String(error);
-      logger.error('Admin seeding failed:', message);
+      logger.error('User seeding failed:', message);
       process.exit(1);
     });
 }
