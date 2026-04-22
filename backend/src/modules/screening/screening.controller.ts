@@ -37,11 +37,11 @@ type RequestWithUser = {
 @ApiTags('Tenant Screening')
 @Controller('screenings/tenant')
 export class ScreeningController {
-  constructor(private readonly screeningService: ScreeningService) {}
+  constructor(private readonly screeningService: ScreeningService) { }
 
   @Post('request')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.LANDLORD, UserRole.AGENT, UserRole.ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.USER)
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Create a tenant screening request' })
   @ApiResponse({ status: 201, description: 'Screening request created' })

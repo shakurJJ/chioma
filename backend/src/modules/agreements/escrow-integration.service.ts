@@ -19,7 +19,7 @@ export class EscrowIntegrationService {
     private readonly agreementRepository: Repository<RentAgreement>,
     private readonly escrowContract: EscrowContractService,
     private readonly dataSource: DataSource,
-  ) {}
+  ) { }
 
   async createEscrowForAgreement(agreementId: string): Promise<StellarEscrow> {
     const queryRunner = this.dataSource.createQueryRunner();
@@ -48,8 +48,8 @@ export class EscrowIntegrationService {
       // Create on-chain escrow
       try {
         const txHash = await this.escrowContract.createEscrow({
-          depositor: agreement.tenantStellarPubKey || '',
-          beneficiary: agreement.landlordStellarPubKey || '',
+          depositor: agreement.userStellarPubKey || '',
+          beneficiary: agreement.adminStellarPubKey || '',
           arbiter: this.getDefaultArbiter(),
           amount: agreement.securityDeposit.toString(),
           token: 'NATIVE',
