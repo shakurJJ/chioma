@@ -4,7 +4,7 @@ interface PageProps {
   };
 }
 
-export default function LandlordDocumentDetailPage({
+export default function UserDocumentDetailPage({
   params: _params,
 }: PageProps) {
   return null;

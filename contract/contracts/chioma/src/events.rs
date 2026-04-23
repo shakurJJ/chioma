@@ -13,8 +13,8 @@ pub struct ContractInitialized {
 }
 
 /// Event emitted when an agreement is created
-/// Topics: ["agr_created", tenant: Address, landlord: Address]
-#[contractevent(topics = ["agr_created"])]
+/// Topics: ["agreement_created", tenant: Address, landlord: Address]
+#[contractevent(topics = ["agreement_created"])]
 pub struct AgreementCreated {
     #[topic]
     pub tenant: Address,
@@ -29,8 +29,8 @@ pub struct AgreementCreated {
 }
 
 /// Event emitted when an agreement is signed
-/// Topics: ["agr_signed", tenant: Address, landlord: Address]
-#[contractevent(topics = ["agr_signed"])]
+/// Topics: ["agreement_signed", tenant: Address, landlord: Address]
+#[contractevent(topics = ["agreement_signed"])]
 pub struct AgreementSigned {
     #[topic]
     pub tenant: Address,
@@ -41,8 +41,8 @@ pub struct AgreementSigned {
 }
 
 /// Event emitted when an agreement is submitted for signing
-/// Topics: ["agr_submit", landlord: Address, tenant: Address]
-#[contractevent(topics = ["agr_submit"])]
+/// Topics: ["agreement_submitted", landlord: Address, tenant: Address]
+#[contractevent(topics = ["agreement_submitted"])]
 pub struct AgreementSubmitted {
     #[topic]
     pub landlord: Address,
@@ -52,8 +52,8 @@ pub struct AgreementSubmitted {
 }
 
 /// Event emitted when an agreement is cancelled
-/// Topics: ["agr_cancel", landlord: Address, tenant: Address]
-#[contractevent(topics = ["agr_cancel"])]
+/// Topics: ["agreement_cancelled", landlord: Address, tenant: Address]
+#[contractevent(topics = ["agreement_cancelled"])]
 pub struct AgreementCancelled {
     #[topic]
     pub landlord: Address,
@@ -62,9 +62,18 @@ pub struct AgreementCancelled {
     pub agreement_id: String,
 }
 
+/// Event emitted when an agreement is approved by a witness (PendingApproval → Active)
+/// Topics: ["agreement_approved", approver: Address]
+#[contractevent(topics = ["agreement_approved"])]
+pub struct AgreementApproved {
+    #[topic]
+    pub approver: Address,
+    pub agreement_id: String,
+}
+
 /// Event emitted when the contract configuration is updated
-/// Topics: ["cfg_updated", admin: Address]
-#[contractevent(topics = ["cfg_updated"])]
+/// Topics: ["config_updated", admin: Address]
+#[contractevent(topics = ["config_updated"])]
 pub struct ConfigUpdated {
     #[topic]
     pub admin: Address,
@@ -168,6 +177,15 @@ pub(crate) fn agreement_cancelled(
     AgreementCancelled {
         landlord,
         tenant,
+        agreement_id,
+    }
+    .publish(env);
+}
+
+/// Helper function to emit agreement approved (witness) event
+pub(crate) fn agreement_approved(env: &Env, agreement_id: String, approver: Address) {
+    AgreementApproved {
+        approver,
         agreement_id,
     }
     .publish(env);
@@ -379,7 +397,7 @@ pub(crate) fn royalty_paid(env: &Env, token_id: String, amount: i128, recipient:
 
 // ─── Rate Limiting Events ─────────────────────────────────────────────────────
 
-#[contractevent(topics = ["rate_limit"])]
+#[contractevent(topics = ["rate_limit_exceeded"])]
 pub struct RateLimitExceeded {
     #[topic]
     pub user: Address,
@@ -426,7 +444,7 @@ pub(crate) fn rate_limit_config_updated(
 
 // ─── Multi-Sig Events ─────────────────────────────────────────────────────────
 
-#[contractevent(topics = ["multisig_init"])]
+#[contractevent(topics = ["multisig_initialized"])]
 pub struct MultiSigInitialized {
     pub admins: u32,
     pub required_signatures: u32,
@@ -561,20 +579,20 @@ pub(crate) fn required_signatures_updated(env: &Env, old_required: u32, new_requ
 
 // ─── Timelock Events ──────────────────────────────────────────────────────────
 
-#[contractevent(topics = ["tl_queued"])]
+#[contractevent(topics = ["timelock_queued"])]
 pub struct TimelockActionQueued {
     #[topic]
     pub action_id: String,
     pub eta: u64,
 }
 
-#[contractevent(topics = ["tl_executed"])]
+#[contractevent(topics = ["timelock_executed"])]
 pub struct TimelockActionExecuted {
     #[topic]
     pub action_id: String,
 }
 
-#[contractevent(topics = ["tl_cancelled"])]
+#[contractevent(topics = ["timelock_cancelled"])]
 pub struct TimelockActionCancelled {
     #[topic]
     pub action_id: String,

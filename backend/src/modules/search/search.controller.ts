@@ -22,6 +22,7 @@ export class SearchController {
   @ApiQuery({ name: 'lat', required: false })
   @ApiQuery({ name: 'lng', required: false })
   @ApiQuery({ name: 'radiusKm', required: false })
+  @ApiQuery({ name: 'amenities', required: false, isArray: true })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'limit', required: false })
   async searchProperties(
@@ -38,12 +39,19 @@ export class SearchController {
     @Query('furnished') furnished?: string,
     @Query('parking') parking?: string,
     @Query('petsAllowed') petsAllowed?: string,
+    @Query('amenities') amenities?: string | string[],
     @Query('lat') lat?: string,
     @Query('lng') lng?: string,
     @Query('radiusKm') radiusKm?: string,
     @Query('page') page?: string,
     @Query('limit') limit?: string,
   ) {
+    const amenityList = amenities
+      ? Array.isArray(amenities)
+        ? amenities
+        : amenities.split(',').map((a) => a.trim())
+      : undefined;
+
     const filters: SearchFilters = {
       query,
       city,
@@ -59,6 +67,7 @@ export class SearchController {
       hasParking: parking !== undefined ? parking === 'true' : undefined,
       petsAllowed:
         petsAllowed !== undefined ? petsAllowed === 'true' : undefined,
+      amenities: amenityList,
       lat: lat ? parseFloat(lat) : undefined,
       lng: lng ? parseFloat(lng) : undefined,
       radiusKm: radiusKm ? parseFloat(radiusKm) : undefined,

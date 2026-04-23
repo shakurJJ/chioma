@@ -26,14 +26,14 @@ export default function RoleSelectionModal({
   const roles = [
     {
       id: 'tenant',
-      label: 'Tenant',
+      label: 'User',
       description: 'I rent properties and pay rent',
       icon: Home,
       color: 'from-blue-500 to-cyan-500',
     },
     {
       id: 'landlord',
-      label: 'Landlord',
+      label: 'Host',
       description: 'I own and manage properties',
       icon: Building2,
       color: 'from-purple-500 to-pink-500',

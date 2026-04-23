@@ -171,9 +171,10 @@ fn test_make_payment_with_different_token() {
         attributes: Vec::new(&env).clone(),
     });
 
-    // Sign agreement to make it active
+    // Sign agreement (moves to PendingApproval) then witness-approve to activate
     client.submit_agreement(&landlord, &agreement_id);
     client.sign_agreement(&tenant, &agreement_id);
+    client.approve_agreement(&admin, &agreement_id);
 
     // Give tenant some pay_token
     let pay_token_sac = soroban_sdk::token::StellarAssetClient::new(&env, &pay_token);

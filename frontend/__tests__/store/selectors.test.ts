@@ -29,15 +29,17 @@ const authState: AuthStore = {
     email: 'a@b.com',
     firstName: 'A',
     lastName: 'B',
-    role: 'landlord',
+    role: 'user',
   },
   accessToken: 'tok',
   refreshToken: 'ref',
   isAuthenticated: true,
   loading: false,
+  walletAddress: null,
   login: async () => ({ success: true }),
   logout: async () => {},
   setTokens: () => {},
+  setWalletAddress: () => {},
   hydrate: () => {},
 };
 
@@ -128,7 +130,7 @@ describe('selectors', () => {
     });
 
     it('selectUserRole returns the role string', () => {
-      expect(selectUserRole(authState)).toBe('landlord');
+      expect(selectUserRole(authState)).toBe('user');
     });
 
     it('selectUserRole returns null when no user', () => {

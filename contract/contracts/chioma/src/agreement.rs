@@ -96,6 +96,7 @@ fn create_agreement_internal(
         total_rent_paid: 0,
         payment_count: 0,
         signed_at: None,
+        witness_id: None,
         payment_token: input.payment_token.clone(),
         next_payment_due: input.terms.start_date,
         metadata_uri: input.metadata_uri,
@@ -171,8 +172,8 @@ pub fn sign_agreement(env: &Env, tenant: Address, agreement_id: String) -> Resul
         return Err(RentalError::Expired);
     }
 
-    // Update agreement status and record signing time
-    agreement.status = AgreementStatus::Active;
+    // Update agreement status and record signing time; awaiting witness approval
+    agreement.status = AgreementStatus::PendingApproval;
     agreement.signed_at = Some(current_time);
 
     // Save updated agreement
@@ -194,6 +195,53 @@ pub fn sign_agreement(env: &Env, tenant: Address, agreement_id: String) -> Resul
         agreement.landlord.clone(),
         current_time,
     );
+
+    Ok(())
+}
+
+/// Approve a pending agreement as a witness (PendingApproval → Active)
+///
+/// Only admin or designated agent may call this. The witness ID is permanently
+/// recorded in the agreement storage, and the agreement transitions to Active.
+pub fn approve_agreement(
+    env: &Env,
+    approver: Address,
+    agreement_id: String,
+) -> Result<(), RentalError> {
+    approver.require_auth();
+
+    let mut agreement: RentAgreement = env
+        .storage()
+        .persistent()
+        .get(&DataKey::Agreement(agreement_id.clone()))
+        .ok_or(RentalError::AgreementNotFound)?;
+
+    // Only valid from PendingApproval state
+    if agreement.status != AgreementStatus::PendingApproval {
+        return Err(RentalError::InvalidState);
+    }
+
+    // Validate agreement has not expired
+    let current_time = env.ledger().timestamp();
+    if current_time > agreement.end_date {
+        return Err(RentalError::Expired);
+    }
+
+    // Permanently record witness and activate agreement
+    agreement.witness_id = Some(approver.clone());
+    agreement.status = AgreementStatus::Active;
+
+    env.storage()
+        .persistent()
+        .set(&DataKey::Agreement(agreement_id.clone()), &agreement);
+    env.storage().persistent().extend_ttl(
+        &DataKey::Agreement(agreement_id.clone()),
+        TTL_THRESHOLD,
+        TTL_BUMP,
+    );
+    env.storage().instance().extend_ttl(TTL_THRESHOLD, TTL_BUMP);
+
+    events::agreement_approved(env, agreement_id, approver);
 
     Ok(())
 }
@@ -255,8 +303,11 @@ pub fn cancel_agreement(
         return Err(RentalError::Unauthorized);
     }
 
-    // Only in Draft or Pending states
-    if agreement.status != AgreementStatus::Draft && agreement.status != AgreementStatus::Pending {
+    // Only in Draft, Pending, or PendingApproval states
+    if agreement.status != AgreementStatus::Draft
+        && agreement.status != AgreementStatus::Pending
+        && agreement.status != AgreementStatus::PendingApproval
+    {
         return Err(RentalError::InvalidState);
     }
 

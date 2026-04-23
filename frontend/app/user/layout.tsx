@@ -9,7 +9,7 @@ import { ClientErrorBoundary } from '@/components/error/ClientErrorBoundary';
 import { useAuth } from '@/store/authStore';
 import WalletConnectButton from '@/components/auth/WalletConnectButton';
 
-export default function TenantDashboardLayout({
+export default function UserDashboardLayout({
   children,
 }: {
   children: React.ReactNode;
