@@ -51,10 +51,10 @@ mod tests_timelock;
 mod tests_version_pause;
 
 pub use agreement::{
-    cancel_agreement, create_agreement, create_agreement_with_token, get_agreement,
-    get_agreement_count, get_agreement_token, get_payment_history, get_payment_split,
-    has_agreement, make_payment_with_token, release_escrow_with_token, sign_agreement,
-    submit_agreement, update_metadata, validate_agreement_params,
+    approve_agreement, cancel_agreement, create_agreement, create_agreement_with_token,
+    get_agreement, get_agreement_count, get_agreement_token, get_payment_history,
+    get_payment_split, has_agreement, make_payment_with_token, release_escrow_with_token,
+    sign_agreement, submit_agreement, update_metadata, validate_agreement_params,
 };
 pub use errors::RentalError;
 pub use multi_token::{
@@ -500,7 +500,8 @@ impl Contract {
 
     /// Sign an existing rental agreement.
     ///
-    /// @notice Tenant signs a pending agreement, moving it to Active. Tenant must authorize.
+    /// @notice Tenant signs a pending agreement, moving it to PendingApproval.
+    ///         A witness must then call `approve_agreement` to activate it.
     /// @param env The Soroban environment.
     /// @param tenant Address of the tenant signing (must authorize).
     /// @param agreement_id Identifier of the agreement to sign.
@@ -512,6 +513,24 @@ impl Contract {
     ) -> Result<(), RentalError> {
         Self::check_paused(&env)?;
         agreement::sign_agreement(&env, tenant, agreement_id)
+    }
+
+    /// Approve a pending agreement as a witness (PendingApproval → Active).
+    ///
+    /// @notice Admin or designated agent witnesses the agreement, permanently recording
+    ///         their ID and activating the escrow. Payouts cannot be triggered before
+    ///         this call succeeds.
+    /// @param env The Soroban environment.
+    /// @param approver Address of the approving witness (must authorize).
+    /// @param agreement_id Identifier of the agreement to approve.
+    /// @return Ok(()) on success.
+    pub fn approve_agreement(
+        env: Env,
+        approver: Address,
+        agreement_id: String,
+    ) -> Result<(), RentalError> {
+        Self::check_paused(&env)?;
+        agreement::approve_agreement(&env, approver, agreement_id)
     }
 
     /// Submit a draft agreement for tenant signature (Draft → Pending).

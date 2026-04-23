@@ -221,10 +221,10 @@ export default function AdminUsersPage() {
               Support
             </option>
             <option value="landlord" className="bg-slate-900">
-              Landlord
+              Host
             </option>
             <option value="tenant" className="bg-slate-900">
-              Tenant
+              User
             </option>
             <option value="agent" className="bg-slate-900">
               Agent

@@ -55,7 +55,7 @@ function MetricCard({
   );
 }
 
-export default function LandlordAnalyticsPage() {
+export default function UserAnalyticsPage() {
   const [days, setDays] = useState(30);
   const { data, isLoading, isError } = useLandlordPropertyAnalytics(days);
 
@@ -294,7 +294,7 @@ export default function LandlordAnalyticsPage() {
 
         <div className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-6">
           <h2 className="text-lg font-semibold text-white mb-5">
-            Landlord Performance
+            Host Performance
           </h2>
           <div className="grid grid-cols-2 gap-4 mb-5">
             <div className="rounded-2xl bg-emerald-500/10 border border-emerald-500/20 p-4">

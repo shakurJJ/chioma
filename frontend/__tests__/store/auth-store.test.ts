@@ -18,7 +18,7 @@ const mockUser = {
   email: 'alice@chioma.local',
   firstName: 'Alice',
   lastName: 'Smith',
-  role: 'tenant' as const,
+  role: 'user' as const,
 };
 
 // ─── Tests ───────────────────────────────────────────────────────────────────

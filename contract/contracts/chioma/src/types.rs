@@ -29,6 +29,7 @@ pub struct TimelockAction {
 pub enum AgreementStatus {
     Draft,
     Pending,
+    PendingApproval,
     Active,
     Completed,
     Cancelled,
@@ -100,6 +101,7 @@ pub struct RentAgreement {
     pub total_rent_paid: i128,
     pub payment_count: u32,
     pub signed_at: Option<u64>,
+    pub witness_id: Option<Address>,
     pub payment_token: Address,
     pub next_payment_due: u64,
     pub metadata_uri: String,

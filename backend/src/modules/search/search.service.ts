@@ -28,6 +28,7 @@ export interface SearchFilters {
   isFurnished?: boolean;
   hasParking?: boolean;
   petsAllowed?: boolean;
+  amenities?: string[];
   // Geospatial
   lat?: number;
   lng?: number;
@@ -152,10 +153,10 @@ export class SearchService {
       .leftJoinAndSelect('property.images', 'images')
       .leftJoinAndSelect('property.amenities', 'amenities');
 
-    // Full-text search
+    // Full-text search using indexed search_vector column
     if (filters.query) {
       qb.andWhere(
-        `(to_tsvector('english', property.title || ' ' || COALESCE(property.description, '')) @@ plainto_tsquery('english', :query) OR property.address ILIKE :likeQuery)`,
+        `(property.search_vector @@ plainto_tsquery('english', :query) OR property.address ILIKE :likeQuery)`,
         { query: filters.query, likeQuery: `%${filters.query}%` },
       );
     }
@@ -217,6 +218,26 @@ export class SearchService {
       });
     }
 
+    // Amenity name filtering (indexed on property_amenities.name)
+    if (filters.amenities && filters.amenities.length > 0) {
+      qb.andWhere((subQb) => {
+        const sub = subQb
+          .subQuery()
+          .select('pa.property_id')
+          .from('property_amenities', 'pa')
+          .where('LOWER(pa.name) IN (:...amenityNames)')
+          .groupBy('pa.property_id')
+          .having('COUNT(DISTINCT LOWER(pa.name)) = :amenityCount')
+          .getQuery();
+        return 'property.id IN ' + sub;
+      });
+      qb.setParameter(
+        'amenityNames',
+        filters.amenities.map((a) => a.toLowerCase()),
+      );
+      qb.setParameter('amenityCount', filters.amenities.length);
+    }
+
     if (
       filters.lat !== undefined &&
       filters.lng !== undefined &&
@@ -236,7 +257,7 @@ export class SearchService {
       const qb = this.propertyRepo.createQueryBuilder('property');
       if (baseFilters.query) {
         qb.andWhere(
-          `to_tsvector('english', property.title || ' ' || COALESCE(property.description, '')) @@ plainto_tsquery('english', :query)`,
+          `property.search_vector @@ plainto_tsquery('english', :query)`,
           { query: baseFilters.query },
         );
       }

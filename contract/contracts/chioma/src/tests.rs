@@ -633,7 +633,7 @@ fn test_sign_agreement_success() {
     let agreement = client
         .get_agreement(&String::from_str(&env, agreement_id))
         .unwrap();
-    assert_eq!(agreement.status, AgreementStatus::Active);
+    assert_eq!(agreement.status, AgreementStatus::PendingApproval);
     assert!(agreement.signed_at.is_some());
     assert_eq!(agreement.tenant, tenant);
 }
@@ -994,6 +994,9 @@ fn test_cancel_agreement_invalid_state() {
     create_pending_agreement(&env, &client, agreement_id, &tenant, &landlord);
 
     client.sign_agreement(&tenant, &String::from_str(&env, agreement_id));
+
+    // Agreement is now PendingApproval; must be approved before cancel is invalid
+    client.approve_agreement(&landlord, &String::from_str(&env, agreement_id));
 
     // Status is now Active
 
